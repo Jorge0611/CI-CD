@@ -3,3 +3,4 @@ client/node_modules/
 client/package-lock.json
 client/package.json
 .env
+client/jsconfig.json

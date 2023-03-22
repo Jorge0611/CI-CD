@@ -3,9 +3,9 @@ import NavBar from "scenes/nav";
 
 const HomePage = () => {
     return(
-     <box>
+     <Box>
       <NavBar/>
-    </box>
+    </Box>
  )
 }
 
