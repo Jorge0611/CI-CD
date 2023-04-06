@@ -1,27 +1,42 @@
-import { homeRoutes } from "@/pages/home/routes";
-import { userRoutes } from "@/pages/user/routes";
-import { PrivateLayout } from "@/layout/PrivateLayout";
-import { UserLayout } from "@/layout/UserLayout";
-import { Navigate, RouteObject } from "react-router-dom";
+import { PrivateLayout } from "@/layouts/PrivateLayout";
+import { UserLayout } from "@/layouts/UserLayout";
+import { Home } from "@/pages/user/Home";
+import { Profile } from "@/pages/user/Profile";
+import { Post } from "@/pages/user/Post";
+import { RouteObject } from "react-router-dom";
 
 export const privateRoutes: RouteObject[] = [
   {
     element: <PrivateLayout />,
     children: [
       {
-        index: true,
-        element: <Navigate to={"home"} />,
-      },
-      {
         element: <UserLayout />,
         children: [
           {
-            path: "home",
-            children: homeRoutes,
+            path: "/",
+            element: <Home />,
           },
           {
-            path: ":username",
-            children: userRoutes,
+            path: "post",
+            children: [
+              {
+                index: true,
+                element: <Home />,
+              },
+              {
+                path: ":postId",
+                element: <Post />,
+              },
+            ],
+          },
+          {
+            path: "user",
+            children: [
+              {
+                path: ":userId",
+                element: <Profile />,
+              },
+            ],
           },
         ],
       },

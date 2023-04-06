@@ -7,6 +7,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
+import { Link } from "react-router-dom";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -122,10 +123,18 @@ export function HeroHeader() {
         </Container>
 
         <div className={classes.controls}>
-          <Button className={classes.control} variant="white" size="lg">
+          <Button
+            component={Link}
+            to={"/auth/login"}
+            className={classes.control}
+            variant="white"
+            size="lg"
+          >
             Log In
           </Button>
           <Button
+            component={Link}
+            to={"/auth/register"}
             className={cx(classes.control, classes.secondaryControl)}
             size="lg"
           >

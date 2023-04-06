@@ -1,7 +1,10 @@
 import { Comment } from "@/components/post/Comment";
 import { PostCard } from "@/components/post/PostCard";
-import { PostEditor } from "@/components/post/PostEditor";
+import { FormValues, PostEditor } from "@/components/post/PostEditor";
+import { usePosts } from "@/hooks/usePosts";
+import { useUser } from "@/hooks/useUser";
 import { Card, Stack, Title } from "@mantine/core";
+import { useParams } from "react-router-dom";
 
 const comments = [
   {
@@ -33,27 +36,30 @@ const comments = [
   },
 ];
 
-export function UserPost() {
+export function Post() {
+  const { data: user, isLoading: isUserLoading } = useUser();
+  const params = useParams<{ postId: string }>();
+  const { data, isLoading } = usePosts(params.postId);
+
+  if (isLoading || isUserLoading) return <div>Loading...</div>;
+
+  const post = Array.isArray(data) ? data[0] : data;
+
+  if (!post) return <div>Post not found</div>;
+  if (!user) return <div>no user</div>;
+
+  function handleCommentSubmit(values: FormValues) {
+    console.log(values);
+  }
+
   return (
     <Stack pos={"relative"}>
-      <PostCard
-        postId={1}
-        location={"Washington DC"}
-        description={"Hello Everybody"}
-        image={"none"}
-        likes={5}
-        comments={6}
-        id={"1"}
-        username={"john_doe"}
-        name={"John Doe"}
-        avatar={"none"}
-        profession={"developer"}
-      />
+      <PostCard {...post} />
 
       <section title={"Comments"}>
         <Title fz={"xl"}>Comments</Title>
         <Stack>
-          <PostEditor />
+          <PostEditor onSubmit={handleCommentSubmit} />
 
           {comments.map((comment) => (
             <Card>

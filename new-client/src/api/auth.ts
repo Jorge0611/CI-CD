@@ -1,30 +1,53 @@
 import { fetcher } from "@/utils/fetcher";
+import { parseJSONToFormData } from "@/utils/parseJSONToFormData";
 
-export interface Login {
-  jwtToken: string;
-  user: User;
+export type UserValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  picturePath?: string;
+  friends: any[];
+  location: string;
+  createdAt: Date;
+  updatedAt?: Date;
+};
+
+export interface User extends UserValues {
+  _id: string;
 }
 
-export interface User {
-  id: string;
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  user: User;
+  jwtToken: string;
+}
+
+export function loginFn(credentials: LoginCredentials): Promise<LoginResponse> {
+  return fetcher("/api/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
+}
+
+export interface RegisterFormValues {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
-  picturePath: string;
-  friends: any[];
+  picture: File | null;
   location: string;
-  createdAt: Date;
-  updatedAt: Date;
-  v: number;
 }
 
-export async function login(email: string, password: string) {
-  return await fetcher<Login>(`${import.meta.env.VITE_API_URL}/auth/login`, {
+export function registerFn(user: RegisterFormValues): Promise<User | unknown> {
+  return fetcher("/api/auth/register", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  }).then((res) => res);
+    body: parseJSONToFormData(user),
+  });
 }

@@ -3,4 +3,7 @@ client/node_modules/
 client/package-lock.json
 client/package.json
 .env
+.vscode
+.idea
+public
 client/jsconfig.json

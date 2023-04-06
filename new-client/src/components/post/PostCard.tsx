@@ -1,4 +1,7 @@
-import { Friend, useFriendListStore } from "@/stores/friend";
+import { likePost, Post } from "@/api/post";
+import { addFriend } from "@/api/user";
+import { useFriends } from "@/hooks/useFriends";
+import { useUser } from "@/hooks/useUser";
 import {
   ActionIcon,
   Anchor,
@@ -14,56 +17,70 @@ import {
 } from "@mantine/core";
 import {
   IconHeart,
+  IconHeartFilled,
   IconMessage,
   IconShare,
   IconUserMinus,
   IconUserPlus,
 } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 
-export interface PostCardProps extends Friend {
-  postId: string;
-  location: string;
-  description: string;
-  image: string;
-  likes: number;
-  comments: number;
-}
+export function PostCard(props: Post) {
+  const { data: user, isLoading: isUserLoading } = useUser();
+  const { data: friends, isLoading: isFriendLoading } = useFriends();
 
-export function PostCard(props: PostCardProps) {
-  const friendsStore = useFriendListStore();
-  const isFriend = friendsStore.friendList.some(
-    (friend) => friend.name === props.name
-  );
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  const likes = {
+    count: Object.entries(props.likes).length,
+    isLiked: Object.keys(props.likes).includes(user?._id || ""),
+  };
+
+  function handleLike() {
+    likePost(props._id, user?._id || "").then(async () => {
+      await queryClient.invalidateQueries({ queryKey: ["posts"] });
+    });
+  }
+
+  function handleFriend(friendId: string) {
+    addFriend(user?._id || "", friendId).then(async () => {
+      await queryClient.invalidateQueries({ queryKey: ["friends"] });
+    });
+  }
+
+  if (isUserLoading || isFriendLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const isFriend = friends?.some((friend) => friend._id === props.userId);
 
   return (
     <Card mb={"lg"} withBorder>
       <Stack>
         <Flex direction={"row"} justify={"space-between"} align={"center"}>
           <Flex direction={"row"} align={"center"}>
-            <Avatar src={props.avatar} radius="xl" size={"lg"} />
+            <Avatar
+              src={"/api/assets/" + props.userPicturePath}
+              radius="xl"
+              size={"lg"}
+            />
             <Space w="md" />
             <Flex direction={"column"}>
               <Anchor
                 component={Link}
-                to={`/${props.username}`}
+                to={`/user/${props.userId}`}
                 fz={"sm"}
                 fw={700}
               >
-                {props.name}
+                {props.firstName} {props.lastName}
               </Anchor>
               <Text fz={"xs"}>{props.location}</Text>
             </Flex>
           </Flex>
           <ActionIcon
-            onClick={() => {
-              if (isFriend) {
-                friendsStore.removeFriend(props.id);
-              } else {
-                friendsStore.addFriend(props);
-              }
-            }}
+            onClick={() => handleFriend(props.userId)}
             color="blue"
             variant="light"
           >
@@ -77,28 +94,37 @@ export function PostCard(props: PostCardProps) {
 
         <Text
           sx={{ cursor: "pointer" }}
-          onClick={() => navigate(`/${props.username}/post/${props.postId}`)}
+          onClick={() => navigate(`/post/${props._id}`)}
         >
           {props.description}
         </Text>
 
-        <Image radius={"md"} src={props.image} />
+        {props.picturePath ? (
+          <Image radius={"md"} src={"/api/assets/" + props.picturePath} />
+        ) : null}
 
         <Flex direction={"row"} justify={"space-between"} align={"center"}>
           <Group>
             <Button
-              leftIcon={<IconHeart size="1.5rem" />}
+              leftIcon={
+                likes.isLiked ? (
+                  <IconHeartFilled size="1.5rem" />
+                ) : (
+                  <IconHeart size="1.5rem" />
+                )
+              }
+              onClick={handleLike}
               variant="subtle"
               color="dark"
             >
-              {props.likes}
+              {likes.count}
             </Button>
             <Button
               leftIcon={<IconMessage size="1.5rem" />}
               variant="subtle"
               color="dark"
             >
-              {props.comments}
+              {/*{props.comments}*/}
             </Button>
           </Group>
 

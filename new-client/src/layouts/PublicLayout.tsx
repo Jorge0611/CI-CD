@@ -1,5 +1,5 @@
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Box, Button, Group, Header, Title } from "@mantine/core";
+import { Box, Button, Group, Header, Space, Title } from "@mantine/core";
 import { Link, Outlet } from "react-router-dom";
 
 export function PublicLayout() {
@@ -21,6 +21,7 @@ export function PublicLayout() {
           </Group>
         </Header>
       </Box>
+      <Space h="xl" />
       <Box mih={"100vh"}>
         <Outlet />
       </Box>

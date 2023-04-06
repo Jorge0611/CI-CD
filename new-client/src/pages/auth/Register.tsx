@@ -1,3 +1,4 @@
+import { registerFn, RegisterFormValues } from "@/api/auth";
 import {
   Anchor,
   Button,
@@ -13,35 +14,24 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Link } from "react-router-dom";
-
-interface FormValues {
-  firstName: string;
-  lastName: string;
-  location: string;
-  occupation: string;
-  image: File | null;
-  email: string;
-  password: string;
-}
+import { notifications } from "@mantine/notifications";
+import { Link, useNavigate } from "react-router-dom";
 
 export function Register(props: PaperProps) {
-  const form = useForm<FormValues>({
+  const navigate = useNavigate();
+  const form = useForm<RegisterFormValues>({
     initialValues: {
       firstName: "",
       lastName: "",
       location: "",
-      occupation: "",
-      image: null,
+      picture: null,
       email: "",
       password: "",
     },
-
     validate: {
       firstName: (val) => (val.length <= 2 ? "Invalid name" : null),
       lastName: (val) => (val.length <= 2 ? "Invalid name" : null),
       location: (val) => (val.length <= 2 ? "Invalid location" : null),
-      occupation: (val) => (val.length <= 2 ? "Invalid occupation" : null),
       email: (val) => (/^\S+@\S+$/.test(val) ? null : "Invalid email"),
       password: (val) =>
         val.length <= 6
@@ -50,15 +40,23 @@ export function Register(props: PaperProps) {
     },
   });
 
-  function handleSubmit(values: FormValues) {
-    console.log(values);
+  async function handleSubmit(values: RegisterFormValues) {
+    const response = await registerFn(values);
+
+    if (response) {
+      notifications.show({
+        title: "User created",
+        message: "You can now login",
+      });
+      navigate("/auth/login");
+    }
   }
 
   return (
     <Center>
       <Paper radius="md" p="xl" w={"60%"} withBorder {...props}>
         <Text size="lg" weight={500}>
-          Welcome to Mantine, please register to continue
+          Welcome to Hook, please register to continue
         </Text>
 
         <Divider labelPosition="center" my="xl" />
@@ -100,34 +98,23 @@ export function Register(props: PaperProps) {
               radius="md"
             />
 
-            <TextInput
-              required
-              label="Occupation"
-              value={form.values.occupation}
-              onChange={(event) =>
-                form.setFieldValue("occupation", event.currentTarget.value)
-              }
-              error={form.errors.occupation && "Invalid email"}
-              radius="md"
-            />
-
             <FileInput
               label="Profile Picture"
               placeholder="Select file"
-              //   value={form.values.image}
+              value={form.values.picture}
               onChange={(event) => {
                 if (event) {
-                  console.log(event);
-                  form.setFieldValue("image", event);
+                  form.setFieldValue("picture", event);
                 }
               }}
-              error={form.errors.image && "Invalid email"}
+              error={form.errors.picture && "Invalid email"}
               radius="md"
             />
 
             <TextInput
               required
               label="Email"
+              autoComplete={"new-password"}
               placeholder="hello@mantine.dev"
               value={form.values.email}
               onChange={(event) =>

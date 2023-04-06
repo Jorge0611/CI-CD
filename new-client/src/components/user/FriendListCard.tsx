@@ -1,4 +1,6 @@
-import { useFriendListStore } from "@/stores/friend";
+import { addFriend } from "@/api/user";
+import { useFriends } from "@/hooks/useFriends";
+import { useUser } from "@/hooks/useUser";
 import {
   ActionIcon,
   Avatar,
@@ -9,6 +11,7 @@ import {
   Text,
 } from "@mantine/core";
 import { IconUserMinus } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function FriendListCard() {
   return (
@@ -23,24 +26,48 @@ export function FriendListCard() {
 }
 
 const FriendCard = () => {
-  const friendListStore = useFriendListStore();
+  const queryClient = useQueryClient();
+  const { data: user, isLoading: isUserLoading } = useUser();
+  const { data: friends, isLoading: isFriendsLoading } = useFriends();
+
+  if (isUserLoading || isFriendsLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) return <div>no user</div>;
+  if (!friends) return <div>no friends</div>;
+
+  function handleFriend(friendId: string) {
+    addFriend(user?._id || "", friendId).then(async () => {
+      await queryClient.invalidateQueries({ queryKey: ["friends"] });
+    });
+  }
 
   return (
     <Stack>
-      {friendListStore.friendList.map((friend) => (
-        <Flex direction={"row"} justify={"space-between"} align={"center"}>
+      {friends.map((friend) => (
+        <Flex
+          key={friend._id}
+          direction={"row"}
+          justify={"space-between"}
+          align={"center"}
+        >
           <Flex direction={"row"} align={"center"}>
-            <Avatar src={friend.avatar} radius="xl" size={"lg"} />
+            <Avatar
+              src={"/api/assets/" + friend.picturePath}
+              radius="xl"
+              size={"lg"}
+            />
             <Space w="md" />
             <Flex direction={"column"}>
               <Text fz={"sm"} fw={700}>
-                {friend.name}
+                {friend.firstName + " " + friend.lastName}
               </Text>
-              <Text fz={"xs"}>{friend.profession}</Text>
+              <Text fz={"xs"}>Worker</Text>
             </Flex>
           </Flex>
           <ActionIcon
-            onClick={() => friendListStore.removeFriend(friend.id)}
+            onClick={() => handleFriend(friend._id)}
             color="blue"
             variant="light"
           >

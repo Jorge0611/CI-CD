@@ -1,4 +1,5 @@
-import { login } from "@/api/auth";
+import { LoginCredentials, loginFn } from "@/api/auth";
+import { useAuthStore } from "@/stores/authStore";
 import {
   Anchor,
   Button,
@@ -16,6 +17,7 @@ import { useForm } from "@mantine/form";
 import { Link } from "react-router-dom";
 
 export function LogIn(props: PaperProps) {
+  const { setToken } = useAuthStore();
   const form = useForm({
     initialValues: {
       email: "",
@@ -28,6 +30,13 @@ export function LogIn(props: PaperProps) {
     },
   });
 
+  async function handleLogin(values: LoginCredentials) {
+    const user = await loginFn(values);
+    if (user) {
+      setToken(user.jwtToken);
+    }
+  }
+
   return (
     <Center>
       <Paper radius="md" p="xl" mx={"auto"} w={500} withBorder {...props}>
@@ -37,13 +46,7 @@ export function LogIn(props: PaperProps) {
 
         <Divider labelPosition="center" my="xl" />
 
-        <form
-          onSubmit={form.onSubmit(() => {
-            login(form.values.email, form.values.password).then((res) => {
-              console.log(res);
-            });
-          })}
-        >
+        <form onSubmit={form.onSubmit((values) => handleLogin(values))}>
           <Stack>
             <TextInput
               required

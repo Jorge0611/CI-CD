@@ -1,20 +1,24 @@
+import { storage } from "@/utils/storage";
 import { create } from "zustand";
 
-export interface User {
-  email: string;
-  password: string;
+interface AuthStore {
+  token: string | null;
+  setToken: (token: string) => void;
+  removeToken: () => void;
 }
 
-type AuthStore = {
-  user: User | null;
-  setUser: (user: User) => void;
-  login: (email: string, password: string) => void;
-  logout: () => void;
-};
+function getInitialToken(): string | null {
+  return storage.getToken() || null;
+}
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),
-  login: (email, password) => set({ user: { email, password } }),
-  logout: () => set({ user: null }),
+  token: getInitialToken(),
+  setToken: (token) => {
+    storage.setToken(token);
+    set({ token });
+  },
+  removeToken: () => {
+    storage.clearToken();
+    set({ token: null });
+  },
 }));

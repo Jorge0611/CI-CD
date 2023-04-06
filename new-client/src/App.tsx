@@ -4,9 +4,14 @@ import {
   ColorSchemeProvider,
   MantineProvider,
 } from "@mantine/core";
-import React, { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Notifications } from "@mantine/notifications";
+import { useState } from "react";
 
 export function App() {
+  const [queryClient] = useState(() => new QueryClient());
+
   const theme: ColorScheme | null = localStorage.getItem(
     "theme"
   ) as ColorScheme;
@@ -19,21 +24,25 @@ export function App() {
   };
 
   return (
-    <ColorSchemeProvider
-      colorScheme={colorScheme}
-      toggleColorScheme={toggleColorScheme}
-    >
-      <MantineProvider
-        theme={{
-          colorScheme: colorScheme,
-          fontFamily: "Inter, sans-serif",
-          fontFamilyMonospace: "Monaco, Courier, monospace",
-          headings: { fontFamily: "Greycliff CF, sans-serif" },
-        }}
-        withGlobalStyles
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryDevtools />
+      <Notifications />
+      <ColorSchemeProvider
+        colorScheme={colorScheme}
+        toggleColorScheme={toggleColorScheme}
       >
-        <AppRoutes />
-      </MantineProvider>
-    </ColorSchemeProvider>
+        <MantineProvider
+          theme={{
+            colorScheme: colorScheme,
+            fontFamily: "Inter, sans-serif",
+            fontFamilyMonospace: "Monaco, Courier, monospace",
+            headings: { fontFamily: "Greycliff CF, sans-serif" },
+          }}
+          withGlobalStyles
+        >
+          <AppRoutes />
+        </MantineProvider>
+      </ColorSchemeProvider>
+    </QueryClientProvider>
   );
 }

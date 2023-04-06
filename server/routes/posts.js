@@ -1,19 +1,25 @@
 import express from "express";
-import {getFeedPosts, getUserPosts, likePost} from "../controllers/posts.js"
+import {
+  getFeedPosts,
+  getPostById,
+  getUserPosts,
+  likePost,
+} from "../controllers/posts.js";
 import { verifyToken } from "../middleware/auth.js";
 
-const router = express.Router()
+const router = express.Router();
 
-
-// READ // 
+// READ //
 //grab the user feed when on homepage (take posts from db)
-router.get("/", verifyToken,getFeedPosts)
+router.get("/", verifyToken, getFeedPosts);
+
+// get post by id
+router.get("/:id", verifyToken, getPostById);
+
 // only grabs user posts
-router.get("/:userId/posts", verifyToken, getUserPosts)
+router.get("/:userId/posts", verifyToken, getUserPosts);
 
+// UPDATE //
+router.patch("/:id/like", verifyToken, likePost);
 
-
-// UPDATE // 
-router.patch("/:id/like", verifyToken, likePost)
-
-export default router
+export default router;
